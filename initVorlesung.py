@@ -1,7 +1,3 @@
-# TODO:
-# - Online auf Github stellen
-
-
 from glob import glob
 from os.path import isdir
 from os import mkdir
@@ -13,7 +9,7 @@ import json
 JSONFILENAME: Final[str] = "vorlesung_counter.json"
 
 
-def createVorlesung(parentDirectory: str) -> None:
+def CreateVorlesung(parentDirectory: str) -> None:
     #  1. Get count in vorlesung_counter.json
     counters: dict[str, int] = json.load(open(JSONFILENAME, ))
     if parentDirectory not in counters.keys():
@@ -24,39 +20,48 @@ def createVorlesung(parentDirectory: str) -> None:
     mkdir(rf"{parentDirectory}\Vorlesung {counters[parentDirectory]}")
 
     # 2. Overwrite because of raised counter
-    print(f"{counters=}")
     json.dump(counters, open(JSONFILENAME, "w"))
+
+
+def FilterDirectories(filecontent: Final[str]) -> list[str]:
+    directoriesToIgnore: list[str] = [path for path in filecontent.split("\n")]
+    allDirectories: list[str] = []
+    for directory in glob("*"):
+        if isdir(directory) and directory not in directoriesToIgnore:
+            allDirectories.append(directory)
+    return allDirectories
+
+
+def UserDirectorySelect(allDirectories: list[str]) -> str:
+    while True:
+        try:
+            indexInput = int(input("-> ")) - 1
+            if indexInput > len(allDirectories) or indexInput < 0:
+                continue#because the index is out of range
+            userSelectedDirectory = allDirectories[indexInput]
+            break
+        except ValueError:
+            continue#if the user entered a non-numeric-value
+    return userSelectedDirectory
 
 
 def main():
     try:#to read the ignore file
-        IGNOREFILE: Final[str] = open(".vorlesung.ignore", "r").read()
+        IgnoreFile_Content: Final[str] = open(".vorlesung.ignore", "r").read()
     except FileNotFoundError:
         pass # All of the directories will be selectable
 
-    DirectoriesToIgnore: list[str] = [path for path in IGNOREFILE.split("\n")]
-    AllDirectories: list[str] = []
-    for directory in glob("*"):
-        if isdir(directory) and directory not in DirectoriesToIgnore:
-            AllDirectories.append(directory)
+    allDirectories = FilterDirectories(IgnoreFile_Content)
+
 
     print("Select the number of the directory to create the new Vorlesung in:")
-    for index, dire in enumerate(AllDirectories):
+    for index, dire in enumerate(allDirectories):
         print(f"{index+1}. {dire}")
-    while True:
-        try:
-            indexInput = int(input("-> ")) - 1
-            if indexInput > len(AllDirectories) or indexInput < 0:
-                continue#because the index is out of range
-            global SelectedDirectory
-            SelectedDirectory = AllDirectories[indexInput]
-            break
 
-        except ValueError:
-            continue#if the user entered a non-numeric-value
+    userSelectedDirectory = UserDirectorySelect(allDirectories)
 
     try:
-        createVorlesung(SelectedDirectory)
+        CreateVorlesung(userSelectedDirectory)
     except KeyError:
         print("There was an error while creating the directory. "
               + "No changes were done")

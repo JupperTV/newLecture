@@ -18,7 +18,7 @@ def ChooseDirectory() -> str:
 # 2. Wähle Ordner zum Ignorieren aus
 # 3. Erstelle .vorlesung.ignore
 def SelectFoldersForVorlesugen(selectedPath: str) -> list[str]:
-    # The newline at the start and the tab on each line is on purpose
+    # The tab on each line is on purpose
     HELP_STRING: Final[str] = """
     -> a [Foldername]   Add a folder to the list
     -> h                Display this help screen
@@ -27,16 +27,27 @@ def SelectFoldersForVorlesugen(selectedPath: str) -> list[str]:
     -> r [Foldername]   Remove a folder from the list
 """[1:]  # Remove the newline at the start
     foldersToIgnore: list[str] = []
-    print("Idk what to put here. Have to think about it in the future")
+    print("Enter the name of a folder that should contain Vorlesungen")
     while True:
         foldersToShow = [f for f in glob(*) if f not in foldersToIgnore]
         for folder in foldersToShow:
             print(folder)
-
+        "\t"
         command, args = input("-> ").split(" ")
-        # This is the annoying part when it comes to user input
-        if (len(command) > 1):
-            ...
+
+        commands: dict[str, callable] = {
+                "a": lambda: raise NotImplementedError,
+                "h": lambda: print(HELP_STRING)
+                "p": lambda: raise NotImplementedError,
+                "q": lambda: break
+
+                }
+        # This is the annoying part of user input
+        if len(command) == 1 and command in commands.keys():
+                continue
+        if not isdir(args):
+            print(f"'{args}' is not a folder"
+            continue
 
     # And write .vorlesungen.ignore
     open(".vorlesungen.ignore", "w").write()

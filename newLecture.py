@@ -6,18 +6,18 @@ from pathlib import Path
 import json
 
 
-JSONFILENAME: Final[str] = "vorlesung_counter.json"
+JSONFILENAME: Final[str] = "lecture_counter.json"
 
 
-def CreateVorlesung(parentDirectory: str) -> None:
-    #  1. Get count in vorlesung_counter.json
+def CreateLecture(parentDirectory: str) -> None:
+    #  1. Get count in lecture_counter.json
     counters: dict[str, int] = json.load(open(JSONFILENAME, ))
     if parentDirectory not in counters.keys():
         raise KeyError("The given directory doesn't exist")
     if len(counters.keys()) == 0:
         raise IOError(f"The {JSONFILENAME} file is empty. Write it manually")
     counters[parentDirectory] += 1
-    mkdir(rf"{parentDirectory}\Vorlesung {counters[parentDirectory]}")
+    mkdir(rf"{parentDirectory}\Lecture {counters[parentDirectory]}")
 
     # 2. Overwrite because of raised counter
     json.dump(counters, open(JSONFILENAME, "w"))
@@ -46,22 +46,22 @@ def UserDirectorySelect(allDirectories: list[str]) -> str:
 
 
 def main():
-    try:#to read the ignore file
-        IgnoreFile_Content: Final[str] = open(".vorlesung.ignore", "r").read()
+    try:
+        IgnoreFileContent: Final[str] = open(JSONFILENAME, "r").read()
     except FileNotFoundError:
-        pass # All of the directories will be selectable
+        # All of the directories will be selectable
+        IgnoreFileContent = ""
 
-    allDirectories = FilterDirectories(IgnoreFile_Content)
+    allDirectories = FilterDirectories(IgnoreFileContent)
 
-
-    print("Select the number of the directory to create the new Vorlesung in:")
+    print("Select the number of the directory to create the new lecture in:")
     for index, dire in enumerate(allDirectories):
         print(f"{index+1}. {dire}")
 
     userSelectedDirectory = UserDirectorySelect(allDirectories)
 
     try:
-        CreateVorlesung(userSelectedDirectory)
+        CreateLecture(userSelectedDirectory)
     except KeyError:
         print("There was an error while creating the directory. "
               + "No changes were done")
